@@ -80,4 +80,13 @@ public class Vertex {
         return this.textureCoord;
     }
 
+    /**
+     * converts to string
+     * @return - the string representation
+     */
+    @Override
+    public String toString() {
+        return this.position.toString() + ", " + this.color.toString() + ", " + this.normal.toString();
+    }
+
 }

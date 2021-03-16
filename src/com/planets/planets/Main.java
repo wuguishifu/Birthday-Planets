@@ -3,6 +3,7 @@ package com.planets.planets;
 import com.planets.engine.graphics.Camera;
 import com.planets.engine.graphics.Renderer;
 import com.planets.engine.graphics.Shader;
+import com.planets.engine.graphics.Vertex;
 import com.planets.engine.io.window.Input;
 import com.planets.engine.io.window.Window;
 import com.planets.engine.math.Vector3f;
@@ -81,6 +82,12 @@ public class Main implements Runnable {
         // create render objects here
         planet = Planet.getInstance(new Vector3f(0));
         planet.createMesh();
+        boolean print = false;
+        if (print) {
+            for (Vertex v : planet.getMesh().getVertices()) {
+                System.out.println(v);
+            }
+        }
 
         // initialize the shader
         shader.create();
