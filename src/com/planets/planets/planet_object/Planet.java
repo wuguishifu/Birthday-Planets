@@ -6,13 +6,10 @@ import com.planets.engine.math.Triangle;
 import com.planets.engine.math.Vector3f;
 import com.planets.engine.math.color.ColorFader;
 import com.planets.engine.math.noise.ImprovedNoise;
-import com.planets.engine.math.noise.Noise;
 import com.planets.engine.objects.RenderObject;
-import com.planets.engine.objects.shapes.Sphere;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Planet extends RenderObject {
 
@@ -38,18 +35,19 @@ public class Planet extends RenderObject {
      * @return - a new procedurally generated planet at that location
      */
     public static Planet getInstance(Vector3f position) {
-        return new Planet(generateMesh(DEFAULT_RADIUS), position, new Vector3f(0), new Vector3f(1));
+        return new Planet(generateMesh(), position, new Vector3f(0), new Vector3f(1));
     }
 
     public static Planet getInstance(float x, float y, float z) {
-        return new Planet(generateMesh(DEFAULT_RADIUS), new Vector3f(x, y, z), new Vector3f(0), new Vector3f(1));
+        return new Planet(generateMesh(), new Vector3f(x, y, z), new Vector3f(0), new Vector3f(1));
     }
 
     public static Planet getInstance(float xyz) {
-        return new Planet(generateMesh(DEFAULT_RADIUS), new Vector3f(xyz), new Vector3f(0), new Vector3f(1));
+        return new Planet(generateMesh(), new Vector3f(xyz), new Vector3f(0), new Vector3f(1));
     }
 
-    private static Mesh generateMesh(float radius) {
+    private static Mesh generateMesh() {
+
         depth = 3; // how much to recursively subdivide faces
         ColorFader cf = new ColorFader( // color chooser
                 new Color(118, 143, 184), // lowest altitude color
@@ -61,12 +59,12 @@ public class Planet extends RenderObject {
         float amplitude = 2.5f; // increase -> larger peaks
 
         // generate the triangles
-        ArrayList<Triangle> triangles = generateTriangles(radius);
+        ArrayList<Triangle> triangles = generateTriangles(Planet.DEFAULT_RADIUS);
 
         float maxHeight = 0.0f;
         for (Vector3f v : previousVertices) {
             v.normalize((float) (
-                    radius + amplitude * Math.max(ImprovedNoise.noise(
+                    Planet.DEFAULT_RADIUS + amplitude * Math.max(ImprovedNoise.noise(
                             v.getX() * spareDistance + spareOffset,
                             v.getY() * spareDistance + spareOffset,
                             v.getZ() * spareDistance + spareOffset
@@ -83,9 +81,9 @@ public class Planet extends RenderObject {
             Triangle t = triangles.get(i);
 
             // calculate the color based on the magnitude of the vertex
-            float ps1 = (Vector3f.length(t.getV1()) - radius) / (maxHeight - radius);
-            float ps2 = (Vector3f.length(t.getV2()) - radius) / (maxHeight - radius);
-            float ps3 = (Vector3f.length(t.getV3()) - radius) / (maxHeight - radius);
+            float ps1 = (Vector3f.length(t.getV1()) - Planet.DEFAULT_RADIUS) / (maxHeight - Planet.DEFAULT_RADIUS);
+            float ps2 = (Vector3f.length(t.getV2()) - Planet.DEFAULT_RADIUS) / (maxHeight - Planet.DEFAULT_RADIUS);
+            float ps3 = (Vector3f.length(t.getV3()) - Planet.DEFAULT_RADIUS) / (maxHeight - Planet.DEFAULT_RADIUS);
 
 //            System.out.println(ps1 + ", " + ps2 + ", " + ps3);
 
