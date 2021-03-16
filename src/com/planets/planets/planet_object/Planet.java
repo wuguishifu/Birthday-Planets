@@ -10,6 +10,7 @@ import com.planets.engine.objects.RenderObject;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Planet extends RenderObject {
 
@@ -48,23 +49,34 @@ public class Planet extends RenderObject {
 
     private static Mesh generateMesh() {
 
+        Random random = new Random(8302000);
+        Color c11 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+        Color c22 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+        Color c33 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+
+//        String[] colors = {"#E97C7C", "#E9B37C", "#6D0269"}; // the colors
+
         depth = 3; // how much to recursively subdivide faces
-        ColorFader cf = new ColorFader( // color chooser
-                new Color(118, 143, 184), // lowest altitude color
-                new Color( 15,  17,  92), // medium altitude color
-                new Color(162, 102, 227)  // high altitude color
-        );
-        float spareDistance = 50f; // increase -> more spikes
-        float spareOffset = 1.5f; // change -> different generation
-        float amplitude = 2.5f; // increase -> larger peaks
+        float spareDistance = 5f * random.nextFloat(); // increase -> more spikes
+        float spareOffset = 2.0f * random.nextFloat(); // change -> different generation
+        float amplitude = 5f * random.nextFloat(); // increase -> larger peaks
+        float radius = 1.0f; // the default radius of the planet (water level)
 
         // generate the triangles
-        ArrayList<Triangle> triangles = generateTriangles(Planet.DEFAULT_RADIUS);
+        ArrayList<Triangle> triangles = generateTriangles(radius);
+
+//        ColorFader cf = new ColorFader( // color chooser
+//                Color.decode(colors[0]), // lowest altitude color
+//                Color.decode(colors[1]), // medium altitude color
+//                Color.decode(colors[2])  // high altitude color
+//        );
+
+        ColorFader cf = new ColorFader(c11, c22, c33);
 
         float maxHeight = 0.0f;
         for (Vector3f v : previousVertices) {
             v.normalize((float) (
-                    Planet.DEFAULT_RADIUS + amplitude * Math.max(ImprovedNoise.noise(
+                    radius + amplitude * Math.max(ImprovedNoise.noise(
                             v.getX() * spareDistance + spareOffset,
                             v.getY() * spareDistance + spareOffset,
                             v.getZ() * spareDistance + spareOffset
@@ -81,9 +93,9 @@ public class Planet extends RenderObject {
             Triangle t = triangles.get(i);
 
             // calculate the color based on the magnitude of the vertex
-            float ps1 = (Vector3f.length(t.getV1()) - Planet.DEFAULT_RADIUS) / (maxHeight - Planet.DEFAULT_RADIUS);
-            float ps2 = (Vector3f.length(t.getV2()) - Planet.DEFAULT_RADIUS) / (maxHeight - Planet.DEFAULT_RADIUS);
-            float ps3 = (Vector3f.length(t.getV3()) - Planet.DEFAULT_RADIUS) / (maxHeight - Planet.DEFAULT_RADIUS);
+            float ps1 = (Vector3f.length(t.getV1()) - radius) / (maxHeight - radius);
+            float ps2 = (Vector3f.length(t.getV2()) - radius) / (maxHeight - radius);
+            float ps3 = (Vector3f.length(t.getV3()) - radius) / (maxHeight - radius);
 
 //            System.out.println(ps1 + ", " + ps2 + ", " + ps3);
 
