@@ -19,10 +19,26 @@ public class ColorFader {
 
     private static final float x1 = 0.0f, x2 = 0.5f, x3 = 1.0f;
 
-    public ColorFader(Color c1, Color c2, Color c3) {
-        this.c1 = new Vector3f(c1);
-        this.c2 = new Vector3f(c2);
-        this.c3 = new Vector3f(c3);
+    public ColorFader(Color c_1, Color c_2, Color c_3) {
+        this.c1 = Vector3f.divide(new Vector3f(c_1), new Vector3f(255));
+        this.c2 = Vector3f.divide(new Vector3f(c_2), new Vector3f(255));
+        this.c3 = Vector3f.divide(new Vector3f(c_3), new Vector3f(255));
+
+        // calculate the slopes
+        this.mr1 = (c2.getX() - c1.getX())/(x2-x1);
+        this.mr2 = (c3.getX() - c2.getX())/(x3-x2);
+        this.mg1 = (c2.getY() - c1.getY())/(x2-x1);
+        this.mg2 = (c3.getY() - c2.getY())/(x3-x2);
+        this.mb1 = (c2.getZ() - c1.getZ())/(x2-x1);
+        this.mb2 = (c3.getZ() - c2.getZ())/(x3-x2);
+
+        // calculate the offsets
+        br1 = c1.getX();
+        br2 = c2.getX();
+        bg1 = c1.getY();
+        bg2 = c2.getY();
+        bb1 = c1.getZ();
+        bb2 = c2.getZ();
     }
 
     /**
