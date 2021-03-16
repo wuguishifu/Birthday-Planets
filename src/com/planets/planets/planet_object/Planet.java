@@ -57,15 +57,15 @@ public class Planet extends RenderObject {
 
         // color chooser
         ColorFader cf = new ColorFader(
-                Vector3f.divide(new Vector3f(118, 143, 184), new Vector3f(255)),
-                Vector3f.divide(new Vector3f( 15,  17,  92), new Vector3f(255)),
-                Vector3f.divide(new Vector3f(162, 102, 227), new Vector3f(255))
+                new Color(118, 143, 184),
+                new Color( 15,  17,  92),
+                new Color(162, 102, 227)
         );
 
         float maxHeight = 0.0f;
         float spareDistance = 50f; // increase -> more spikes
         float spareOffset = 1.5f; // change -> different generation
-        float amplitude = 2.5f; // increase -> larger peaks
+        float amplitude = 0.4f; // increase -> larger peaks
         for (Vector3f v : previousVertices) {
             v.normalize((float) (
                     radius + amplitude * Math.max(ImprovedNoise.noise(
@@ -89,29 +89,14 @@ public class Planet extends RenderObject {
             float ps2 = (Vector3f.length(t.getV2()) - radius) / (maxHeight - radius);
             float ps3 = (Vector3f.length(t.getV3()) - radius) / (maxHeight - radius);
 
-//            System.out.println(ps1 + ", " + ps2 + ", " + ps3);
-
-            // generate colors - blue ice (very nice)
-//            Vector3f c1 = new Vector3f(0.1f - ps1, 0.5f - ps1, 1-ps1);
-//            Vector3f c2 = new Vector3f(0.1f - ps2, 0.5f - ps2, 1-ps2);
-//            Vector3f c3 = new Vector3f(0.1f - ps3, 0.5f - ps3, 1-ps3);
-
-//            Vector3f c1 = new Vector3f(0.4f * ps1, ps1, 1 - ps1);
-//            Vector3f c2 = new Vector3f(0.4f * ps2, ps2, 1 - ps2);
-//            Vector3f c3 = new Vector3f(0.4f * ps3, ps3, 1 - ps3);
-
-//            Vector3f c1 = new Vector3f(0.5f * ps1, 0.5f - 0.5f * Math.abs(0.5f - ps1), 0.5f - 1f * ps1);
-//            Vector3f c2 = new Vector3f(0.5f * ps2, 0.5f - 0.5f * Math.abs(0.5f - ps2), 0.5f - 1f * ps2);
-//            Vector3f c3 = new Vector3f(0.5f * ps3, 0.5f - 0.5f * Math.abs(0.5f - ps3), 0.5f - 1f * ps3);
-
             Vector3f c1 = cf.getColor(ps1);
             Vector3f c2 = cf.getColor(ps2);
             Vector3f c3 = cf.getColor(ps3);
 
             // compute normal vectors
             Vector3f n1 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV2(), t.getV1()), Vector3f.subtract(t.getV3(), t.getV1())));
-//            Vector3f n2 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV3(), t.getV2()), Vector3f.subtract(t.getV1(), t.getV2())));
-//            Vector3f n3 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV1(), t.getV3()), Vector3f.subtract(t.getV2(), t.getV3())));
+            // Vector3f n2 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV3(), t.getV2()), Vector3f.subtract(t.getV1(), t.getV2())));
+            // Vector3f n3 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV1(), t.getV3()), Vector3f.subtract(t.getV2(), t.getV3())));
 
             // create the vertices
             vertices[3 * i]     = new Vertex(t.getV1(), c1, n1);

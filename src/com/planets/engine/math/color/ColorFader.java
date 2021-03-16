@@ -2,6 +2,8 @@ package com.planets.engine.math.color;
 
 import com.planets.engine.math.Vector3f;
 
+import java.awt.*;
+
 public class ColorFader {
 
     /**
@@ -16,6 +18,12 @@ public class ColorFader {
     private float br1, br2, bg1, bg2, bb1, bb2;
 
     private static final float x1 = 0.0f, x2 = 0.5f, x3 = 1.0f;
+
+    public ColorFader(Color c1, Color c2, Color c3) {
+        this.c1 = new Vector3f(c1);
+        this.c2 = new Vector3f(c2);
+        this.c3 = new Vector3f(c3);
+    }
 
     /**
      * default constructor
