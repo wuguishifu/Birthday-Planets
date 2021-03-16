@@ -43,7 +43,10 @@ void main() {
     vec3 specular = specularStrength * spec * lightColor;
 
     // combine the ambient and diffusion light into the final fragment color
-    vec3 colorResult = (ambientLight + diffuseLight + specular) * passColor; // combine the light components
+//    vec3 colorResult = (ambientLight + diffuseLight /* + specular*/) * passColor; // combine the light components
+
+    vec3 colorResult = (ambientLight + diffuseLight) * passColor;
 
     outColor = vec4(colorResult, alpha);
+//    outColor = vec4(passColor, 1.0);
 }
