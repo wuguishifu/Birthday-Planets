@@ -6,6 +6,7 @@ import com.planets.engine.math.Triangle;
 import com.planets.engine.math.Vector3f;
 import com.planets.engine.math.Vector4f;
 import com.planets.engine.math.color.ColorFader3C;
+import com.planets.engine.math.noise.ImprovedNoise;
 import com.planets.engine.math.noise.SimplexNoise;
 import com.planets.engine.objects.RenderObject;
 
@@ -59,28 +60,18 @@ public class Planet extends RenderObject {
 
     private static Mesh generateMesh() {
 
-        Random random = new Random(10022001);
-//        Color c11 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-//        Color c22 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-//        Color c33 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-
-//        depth = 3; // how much to recursively subdivide faces
-//        float spareDistance = 5f * random.nextFloat(); // increase -> more spikes
-//        float spareOffset = 2.0f * random.nextFloat(); // change -> different generation
-//        float amplitude = 5f * random.nextFloat(); // increase -> larger peaks
-//        float radius = 2.0f * random.nextFloat(); // the default radius of the planet (water level)
-        // want radius eventually to be  abs(2000 - birthyear) % 10
-
-        Color c11 = Color.decode("#1a285a");
-        Color c22 = Color.decode("#9966cc");
-        Color c33 = Color.decode("#9933cc");
-
-        depth = 5;
-        float spareDistance = 0.7f;
-        float spareOffset = 2f;
-        float amplitude = 5.0f;
-        float radius = 12.0f;
         boolean blend = true;
+
+        Random random = new Random(60902);
+        Color c11 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+        Color c22 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+        Color c33 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+
+        depth = 4; // how much to recursively subdivide faces
+        float spareDistance = 3.5f * random.nextFloat(); // increase -> more spikes
+        float spareOffset = 2.0f * random.nextFloat(); // change -> different generation
+        float amplitude = 3.5f * random.nextFloat(); // increase -> larger peaks
+        float radius = 2.0f; // the default radius of the planet (water level)
 
         // generate the triangles
         ArrayList<Triangle> triangles = generateTriangles(radius);
@@ -94,18 +85,11 @@ public class Planet extends RenderObject {
         for (Vector3f v : previousVertices) {
 
             float newRadius = (float) (
-                    radius + amplitude * Math.max(simplexNoise.getNoise3D(
+                    radius + amplitude * Math.max(ImprovedNoise.noise(
                             v.getX() * spareDistance + spareOffset,
                             v.getY() * spareDistance + spareOffset,
                             v.getZ() * spareDistance + spareOffset
                     ), 0));
-
-//            float newRadius = (float) (
-//                    radius + amplitude * simplexNoise.getNoise3D(
-//                            v.getX() * spareDistance + spareOffset,
-//                            v.getY() * spareDistance + spareOffset,
-//                            v.getZ() * spareDistance + spareOffset
-//                    ));
 
             v.normalize(newRadius);
 
@@ -141,17 +125,6 @@ public class Planet extends RenderObject {
             Vector3f v1 = new Vector3f(t.getV1());
             Vector3f v2 = new Vector3f(t.getV2());
             Vector3f v3 = new Vector3f(t.getV3());
-
-//            // consider the ocean bias (radius)
-//            if (Vector3f.length(v1) < radius) {
-//                v1.normalize(radius);
-//            }
-//            if (Vector3f.length(v2) < radius) {
-//                v2.normalize(radius);
-//            }
-//            if (Vector3f.length(v3) < radius) {
-//                v3.normalize(radius);
-//            }
 
             // create the vertices
             if (blend) {

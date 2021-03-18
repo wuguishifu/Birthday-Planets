@@ -19,7 +19,7 @@ public class Camera {
     // arcball camera variables
     private Vector3f lookingAt; // the position the camera is looking at
 
-    private static final float DEFAULT_DISTANCE = 30f;
+    private static final float DEFAULT_DISTANCE = 7f;
     private float distance = DEFAULT_DISTANCE; // the magnitude distance to the looking position
 
     private static final float DEFAULT_HORIZONTAL_DISTANCE = 0, DEFAULT_VERTICAL_DISTANCE = 0; // default distance from looking position

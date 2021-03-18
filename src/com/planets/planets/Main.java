@@ -125,13 +125,13 @@ public class Main implements Runnable {
         renderer.renderMesh(planet, camera, LIGHT_POSITION);
 
         // render the back face first
-        GL11.glCullFace(GL11.GL_FRONT);
-        renderer.renderMesh(atmosphere1, camera, LIGHT_POSITION);
-        renderer.renderMesh(atmosphere2, camera, LIGHT_POSITION);
-        // then render the front face
-        GL11.glCullFace(GL11.GL_BACK);
-        renderer.renderMesh(atmosphere1, camera, LIGHT_POSITION);
-        renderer.renderMesh(atmosphere2, camera, LIGHT_POSITION);
+//        GL11.glCullFace(GL11.GL_FRONT);
+//        renderer.renderMesh(atmosphere1, camera, LIGHT_POSITION);
+//        renderer.renderMesh(atmosphere2, camera, LIGHT_POSITION);
+//        // then render the front face
+//        GL11.glCullFace(GL11.GL_BACK);
+//        renderer.renderMesh(atmosphere1, camera, LIGHT_POSITION);
+//        renderer.renderMesh(atmosphere2, camera, LIGHT_POSITION);
 
         // swap buffers at the end
         window.swapBuffers();
