@@ -53,5 +53,5 @@ void main() {
 //    vec3 colorResult = (ambientLight + diffuseLight) * color;
 
     outColor = vec4(colorResult, alpha);
-//    outColor = vec4(passColor, 1.0); // test renderer with just full color
+//    outColor = vec4(passColor); // test renderer with just full color
 }

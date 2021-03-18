@@ -1,4 +1,4 @@
-package com.planets.planets.planet_object;
+package com.planets.planets.universe.atmosphere;
 
 import com.planets.engine.graphics.Mesh;
 import com.planets.engine.graphics.Vertex;
@@ -8,7 +8,6 @@ import com.planets.engine.math.Vector4f;
 import com.planets.engine.math.noise.ImprovedNoise;
 import com.planets.engine.objects.RenderObject;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 

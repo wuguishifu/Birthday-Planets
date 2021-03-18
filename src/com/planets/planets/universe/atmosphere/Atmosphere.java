@@ -1,24 +1,19 @@
-package com.planets.planets.planet_object;
+package com.planets.planets.universe.atmosphere;
 
 import com.planets.engine.graphics.Mesh;
 import com.planets.engine.graphics.Vertex;
 import com.planets.engine.math.Triangle;
 import com.planets.engine.math.Vector3f;
 import com.planets.engine.math.Vector4f;
-import com.planets.engine.math.color.ColorFader;
-import com.planets.engine.math.noise.ImprovedNoise;
 import com.planets.engine.math.noise.SimplexNoise;
 import com.planets.engine.objects.RenderObject;
 
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.Random;
 
-public class Planet extends RenderObject {
+public class Atmosphere extends RenderObject {
 
-    // generation variables
     private static int depth; // the amount of times to recursively subdivide faces
-    private static final float phi = 1.618f; // the golden ratio used for approximating a tetrahedron
+    private static final float phi = 1.618f;
 
     /**
      * default constructor
@@ -27,25 +22,12 @@ public class Planet extends RenderObject {
      * @param rotation - the rotation of the planet
      * @param scale - the scale of the planet
      */
-    public Planet(Mesh mesh, Vector3f position, Vector3f rotation, Vector3f scale) {
+    public Atmosphere(Mesh mesh, Vector3f position, Vector3f rotation, Vector3f scale) {
         super(mesh, position, rotation, scale);
     }
 
-    /**
-     * gets an instance of the planet
-     * @param position - the position of the planet
-     * @return - a new procedurally generated planet at that location
-     */
-    public static Planet getInstance(Vector3f position) {
-        return new Planet(generateMesh(), position, new Vector3f(0), new Vector3f(1));
-    }
-
-    public static Planet getInstance(float x, float y, float z) {
-        return new Planet(generateMesh(), new Vector3f(x, y, z), new Vector3f(0), new Vector3f(1));
-    }
-
-    public static Planet getInstance(float xyz) {
-        return new Planet(generateMesh(), new Vector3f(xyz), new Vector3f(0), new Vector3f(1));
+    public static Atmosphere getInstance(Vector3f position, float radius) {
+        return new Atmosphere(generateMesh(radius), position, new Vector3f(0), new Vector3f(1));
     }
 
     /**
@@ -58,51 +40,32 @@ public class Planet extends RenderObject {
         this.setRotation(this.getRotation().add(dx, dy, dz));
     }
 
-    private static Mesh generateMesh() {
+    private static Mesh generateMesh(float radius) {
 
-        Random random = new Random(10022001);
-//        Color c11 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-//        Color c22 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-//        Color c33 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-
-//        depth = 3; // how much to recursively subdivide faces
-//        float spareDistance = 5f * random.nextFloat(); // increase -> more spikes
-//        float spareOffset = 2.0f * random.nextFloat(); // change -> different generation
-//        float amplitude = 5f * random.nextFloat(); // increase -> larger peaks
-//        float radius = 2.0f * random.nextFloat(); // the default radius of the planet (water level)
-        // want radius eventually to be  abs(2000 - birthyear) % 10
-
-        Color c11 = Color.decode("#1a285a");
-        Color c22 = Color.decode("#3b5842");
-        Color c33 = Color.decode("#a99041");
-
-        depth = 4;
-        float spareDistance = 0.5f;
+        depth = 5;
+        float spareDistance = 0.7f;
         float spareOffset = 2f;
-        float amplitude = 5.0f;
-        float radius = 10.0f;
-        float oceanBias = 0.2f;
+        float amplitude = 1f;
+
+        float alphaSpareDistance = 0.2f;
+        float alphaSpareOffset = 2f;
+        float alphaSpareAmplitude = 0.33f;
+        float alphaAmplitude = 0.5f;
+        float alphaOffset = 0.2f;
+
+        int seed = (int) radius;
+        SimplexNoise simplexNoise = new SimplexNoise(11f, 0.6f, seed);
 
         // generate the triangles
         ArrayList<Triangle> triangles = generateTriangles(radius);
 
-        ColorFader cf = new ColorFader(c11, c22, c33);
-
-        int seed = 10;
-        SimplexNoise simplexNoise = new SimplexNoise(5, 0.7f, seed);
-
-        float maxHeight = 0.0f;
         for (Vector3f v : previousVertices) {
             v.normalize((float) (
                     radius + amplitude * Math.max(simplexNoise.getNoise3D(
-                            v.getX() * spareDistance,
-                            v.getY() * spareDistance,
-                            v.getZ() * spareDistance
+                            v.getX() * spareDistance + spareOffset,
+                            v.getY() * spareDistance + spareOffset,
+                            v.getZ() * spareDistance + spareOffset
                     ), 0)));
-
-            if (Vector3f.length(v) > maxHeight) {
-                maxHeight = Vector3f.length(v);
-            }
         }
 
         // create the vertex array
@@ -110,43 +73,23 @@ public class Planet extends RenderObject {
         for (int i = 0; i < triangles.size(); i++) {
             Triangle t = triangles.get(i);
 
-            // calculate the color based on the magnitude of the vertex
-            float ps1 = (Vector3f.length(t.getV1()) - radius) / (maxHeight - radius);
-            float ps2 = (Vector3f.length(t.getV2()) - radius) / (maxHeight - radius);
-            float ps3 = (Vector3f.length(t.getV3()) - radius) / (maxHeight - radius);
+            // the color
+            Vector3f color = new Vector3f(1.0f, 1.0f, 1.0f);
 
-//            System.out.println(ps1 + ", " + ps2 + ", " + ps3);
-
-            // generate colors - blue ice (very nice)
-//            Vector3f c1 = new Vector3f(0.1f - ps1, 0.5f - ps1, 1-ps1);
-//            Vector3f c2 = new Vector3f(0.1f - ps2, 0.5f - ps2, 1-ps2);
-//            Vector3f c3 = new Vector3f(0.1f - ps3, 0.5f - ps3, 1-ps3);
-
-//            Vector3f c1 = new Vector3f(0.4f * ps1, ps1, 1 - ps1);
-//            Vector3f c2 = new Vector3f(0.4f * ps2, ps2, 1 - ps2);
-//            Vector3f c3 = new Vector3f(0.4f * ps3, ps3, 1 - ps3);
-
-//            Vector3f c1 = new Vector3f(0.5f * ps1, 0.5f - 0.5f * Math.abs(0.5f - ps1), 0.5f - 1f * ps1);
-//            Vector3f c2 = new Vector3f(0.5f * ps2, 0.5f - 0.5f * Math.abs(0.5f - ps2), 0.5f - 1f * ps2);
-//            Vector3f c3 = new Vector3f(0.5f * ps3, 0.5f - 0.5f * Math.abs(0.5f - ps3), 0.5f - 1f * ps3);
-
-            Vector3f _c1 = cf.getColor(ps1);
-            Vector3f _c2 = cf.getColor(ps2);
-            Vector3f _c3 = cf.getColor(ps3);
-
-            Vector4f c1 = new Vector4f(_c1, 1.0f);
-            Vector4f c2 = new Vector4f(_c2, 1.0f);
-            Vector4f c3 = new Vector4f(_c3, 1.0f);
+            float a1 = (float) simplexNoise.getNoise3D(
+                    t.getV1().getX() * spareDistance,
+                    t.getV1().getY() * spareDistance,
+                    t.getV1().getZ() * spareDistance
+            );
+//            a1 = Math.max(a1 - alphaOffset, 0);
 
             // compute normal vectors
             Vector3f n1 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV2(), t.getV1()), Vector3f.subtract(t.getV3(), t.getV1())));
-//            Vector3f n2 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV3(), t.getV2()), Vector3f.subtract(t.getV1(), t.getV2())));
-//            Vector3f n3 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV1(), t.getV3()), Vector3f.subtract(t.getV2(), t.getV3())));
 
             // create the vertices
-            vertices[3 * i]     = new Vertex(t.getV1(), c1, n1);
-            vertices[3 * i + 1] = new Vertex(t.getV2(), c2, n1);
-            vertices[3 * i + 2] = new Vertex(t.getV3(), c3, n1);
+            vertices[3 * i]     = new Vertex(t.getV1(), new Vector4f(color, a1), t.getV1());
+            vertices[3 * i + 1] = new Vertex(t.getV2(), new Vector4f(color, a1), t.getV2());
+            vertices[3 * i + 2] = new Vertex(t.getV3(), new Vector4f(color, a1), t.getV3());
         }
 
         // generate draw order indices
@@ -264,4 +207,5 @@ public class Planet extends RenderObject {
 
         return faces;
     }
+
 }

@@ -4,7 +4,7 @@ import com.planets.engine.math.Vector3f;
 
 import java.awt.*;
 
-public class ColorFader {
+public class ColorFader3C {
 
     /**
      * the 3 color fade values
@@ -12,14 +12,22 @@ public class ColorFader {
     private Vector3f c1, c2, c3;
 
     // slopes
-    private float mr1, mr2, mg1, mg2, mb1, mb2;
+    private float mr1, mr2;
+    private float mg1, mg2;
+    private float mb1, mb2;
 
     // offsets
-    private float br1, br2, bg1, bg2, bb1, bb2;
+    private float br1, br2;
+    private float bg1, bg2;
+    private float bb1, bb2;
 
-    private static final float x1 = 0.0f, x2 = 0.5f, x3 = 1.0f;
+    private float x1 = 0.0f;
+    private float x2;
+    private float x3 = 1.0f;
 
-    public ColorFader(Color c_1, Color c_2, Color c_3) {
+    public ColorFader3C(Color c_1, Color c_2, Color c_3, float xChange) {
+        x2 = xChange;
+
         this.c1 = Vector3f.divide(new Vector3f(c_1), new Vector3f(255));
         this.c2 = Vector3f.divide(new Vector3f(c_2), new Vector3f(255));
         this.c3 = Vector3f.divide(new Vector3f(c_3), new Vector3f(255));
@@ -47,7 +55,7 @@ public class ColorFader {
      * @param c2 - color 2
      * @param c3 - color 3
      */
-    public ColorFader(Vector3f c1, Vector3f c2, Vector3f c3) {
+    public ColorFader3C(Vector3f c1, Vector3f c2, Vector3f c3) {
         this.c1 = c1;
         this.c2 = c2;
         this.c3 = c3;
@@ -73,24 +81,14 @@ public class ColorFader {
 
         float r, g, b;
 
-        // calculate red component
+        // calculate the components
         if (x < x2) {
             r = mr1 * x + br1;
-        } else {
-            r = mr2 * x + br2;
-        }
-
-        // calculate green component
-        if (x < x2) {
             g = mg1 * x + bg1;
-        } else {
-            g = mg2 * x + bg2;
-        }
-
-        // calculate blue component
-        if (x < x2) {
             b = mb1 * x + bb1;
         } else {
+            r = mr2 * x + br2;
+            g = mg2 * x + bg2;
             b = mb2 * x + bb2;
         }
 

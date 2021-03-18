@@ -1,13 +1,11 @@
-package com.planets.planets.planet_object;
+package com.planets.planets.universe.planets;
 
 import com.planets.engine.graphics.Mesh;
 import com.planets.engine.graphics.Vertex;
 import com.planets.engine.math.Triangle;
 import com.planets.engine.math.Vector3f;
 import com.planets.engine.math.Vector4f;
-import com.planets.engine.math.color.ColorFader;
-import com.planets.engine.math.noise.ImprovedNoise;
-import com.planets.engine.math.noise.Noise;
+import com.planets.engine.math.color.ColorFader3C;
 import com.planets.engine.math.noise.SimplexNoise;
 import com.planets.engine.objects.RenderObject;
 
@@ -15,10 +13,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Atmosphere extends RenderObject {
+public class Planet extends RenderObject {
 
+    // generation variables
     private static int depth; // the amount of times to recursively subdivide faces
-    private static final float phi = 1.618f;
+    private static final float phi = 1.618f; // the golden ratio used for approximating a tetrahedron
 
     /**
      * default constructor
@@ -27,12 +26,25 @@ public class Atmosphere extends RenderObject {
      * @param rotation - the rotation of the planet
      * @param scale - the scale of the planet
      */
-    public Atmosphere(Mesh mesh, Vector3f position, Vector3f rotation, Vector3f scale) {
+    public Planet(Mesh mesh, Vector3f position, Vector3f rotation, Vector3f scale) {
         super(mesh, position, rotation, scale);
     }
 
-    public static Atmosphere getInstance(Vector3f position) {
-        return new Atmosphere(generateMesh(), position, new Vector3f(0), new Vector3f(1));
+    /**
+     * gets an instance of the planet
+     * @param position - the position of the planet
+     * @return - a new procedurally generated planet at that location
+     */
+    public static Planet getInstance(Vector3f position) {
+        return new Planet(generateMesh(), position, new Vector3f(0), new Vector3f(1));
+    }
+
+    public static Planet getInstance(float x, float y, float z) {
+        return new Planet(generateMesh(), new Vector3f(x, y, z), new Vector3f(0), new Vector3f(1));
+    }
+
+    public static Planet getInstance(float xyz) {
+        return new Planet(generateMesh(), new Vector3f(xyz), new Vector3f(0), new Vector3f(1));
     }
 
     /**
@@ -47,59 +59,110 @@ public class Atmosphere extends RenderObject {
 
     private static Mesh generateMesh() {
 
-        depth = 4;
+        Random random = new Random(10022001);
+//        Color c11 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+//        Color c22 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+//        Color c33 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+
+//        depth = 3; // how much to recursively subdivide faces
+//        float spareDistance = 5f * random.nextFloat(); // increase -> more spikes
+//        float spareOffset = 2.0f * random.nextFloat(); // change -> different generation
+//        float amplitude = 5f * random.nextFloat(); // increase -> larger peaks
+//        float radius = 2.0f * random.nextFloat(); // the default radius of the planet (water level)
+        // want radius eventually to be  abs(2000 - birthyear) % 10
+
+        Color c11 = Color.decode("#1a285a");
+        Color c22 = Color.decode("#9966cc");
+        Color c33 = Color.decode("#9933cc");
+
+        depth = 5;
         float spareDistance = 0.7f;
         float spareOffset = 2f;
-        float amplitude = 0.5f;
-        float radius = 13.0f;
-
-        float alphaSpareDistance = 0.2f;
-        float alphaSpareOffset = 2f;
-        float alphaSpareAmplitude = 0.33f;
-        float alphaAmplitude = 0.5f;
-        float alphaOffset = 0.2f;
-
-        SimplexNoise simplexNoise = new SimplexNoise(2, 0.2f, 10);
+        float amplitude = 5.0f;
+        float radius = 12.0f;
+        boolean blend = true;
 
         // generate the triangles
         ArrayList<Triangle> triangles = generateTriangles(radius);
 
-//        for (Vector3f v : previousVertices) {
-//            v.normalize((float) (
-//                    radius + amplitude * Math.max(ImprovedNoise.noise(
+        ColorFader3C cf = new ColorFader3C(c11, c22, c33, 0.5f);
+
+        int seed = 10;
+        SimplexNoise simplexNoise = new SimplexNoise(11f, 0.6f, seed);
+
+        float maxHeight = 0.0f;
+        for (Vector3f v : previousVertices) {
+
+            float newRadius = (float) (
+                    radius + amplitude * Math.max(simplexNoise.getNoise3D(
+                            v.getX() * spareDistance + spareOffset,
+                            v.getY() * spareDistance + spareOffset,
+                            v.getZ() * spareDistance + spareOffset
+                    ), 0));
+
+//            float newRadius = (float) (
+//                    radius + amplitude * simplexNoise.getNoise3D(
 //                            v.getX() * spareDistance + spareOffset,
 //                            v.getY() * spareDistance + spareOffset,
 //                            v.getZ() * spareDistance + spareOffset
-//                    ), 0)));
-//        }
+//                    ));
+
+            v.normalize(newRadius);
+
+            if (Vector3f.length(v) > maxHeight) {
+                maxHeight = Vector3f.length(v);
+            }
+        }
 
         // create the vertex array
         Vertex[] vertices = new Vertex[triangles.size() * 3];
         for (int i = 0; i < triangles.size(); i++) {
             Triangle t = triangles.get(i);
 
-            // the color
-            Vector3f color = new Vector3f(1.0f, 1.0f, 1.0f);
-//            float a1 = alphaAmplitude * (float) Math.max(((1.0f + ImprovedNoise.noise(
-//                    t.getV1().getX() * alphaSpareDistance + alphaSpareOffset,
-//                    t.getV1().getY() * alphaSpareDistance + alphaSpareOffset,
-//                    t.getV1().getZ() * alphaSpareDistance + alphaSpareOffset
-//            )) * alphaSpareAmplitude - alphaOffset), 0.0f);
-
-            float a1 = (float) simplexNoise.getNoise3D(
-                    t.getV1().getX() * spareDistance,
-                    t.getV1().getY() * spareDistance,
-                    t.getV1().getZ() * spareDistance
-            );
-//            a1 = Math.max(a1 - alphaOffset, 0);
+            // calculate the color based on the magnitude of the vertex
+            float ps2, ps3;
+            Vector3f _c2, _c3;
+            Vector4f c2 = new Vector4f(0), c3 = new Vector4f(0);
+            if (blend) {
+                ps2 = (Vector3f.length(t.getV2()) - radius) / (maxHeight - radius);
+                ps3 = (Vector3f.length(t.getV3()) - radius) / (maxHeight - radius);
+                _c2 = cf.getColor(ps2);
+                _c3 = cf.getColor(ps3);
+                c2 = new Vector4f(_c2, 1.0f);
+                c3 = new Vector4f(_c3, 1.0f);
+            }
+            float ps1 = (Vector3f.length(t.getV1()) - radius) / (maxHeight - radius);
+            Vector3f _c1 = cf.getColor(ps1);
+            Vector4f c1 = new Vector4f(_c1, 1.0f);
 
             // compute normal vectors
             Vector3f n1 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV2(), t.getV1()), Vector3f.subtract(t.getV3(), t.getV1())));
 
+            Vector3f v1 = new Vector3f(t.getV1());
+            Vector3f v2 = new Vector3f(t.getV2());
+            Vector3f v3 = new Vector3f(t.getV3());
+
+//            // consider the ocean bias (radius)
+//            if (Vector3f.length(v1) < radius) {
+//                v1.normalize(radius);
+//            }
+//            if (Vector3f.length(v2) < radius) {
+//                v2.normalize(radius);
+//            }
+//            if (Vector3f.length(v3) < radius) {
+//                v3.normalize(radius);
+//            }
+
             // create the vertices
-            vertices[3 * i]     = new Vertex(t.getV1(), new Vector4f(color, a1), t.getV1());
-            vertices[3 * i + 1] = new Vertex(t.getV2(), new Vector4f(color, a1), t.getV2());
-            vertices[3 * i + 2] = new Vertex(t.getV3(), new Vector4f(color, a1), t.getV3());
+            if (blend) {
+                vertices[3 * i]     = new Vertex(v1, c1, n1);
+                vertices[3 * i + 1] = new Vertex(v2, c2, n1);
+                vertices[3 * i + 2] = new Vertex(v3, c3, n1);
+            } else {
+                vertices[3 * i]     = new Vertex(v1, c1, n1);
+                vertices[3 * i + 1] = new Vertex(v2, c1, n1);
+                vertices[3 * i + 2] = new Vertex(v3, c1, n1);
+            }
         }
 
         // generate draw order indices
@@ -217,5 +280,4 @@ public class Atmosphere extends RenderObject {
 
         return faces;
     }
-
 }
