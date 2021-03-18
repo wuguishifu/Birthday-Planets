@@ -19,13 +19,13 @@ public class Camera {
     // arcball camera variables
     private Vector3f lookingAt; // the position the camera is looking at
 
-    private static final float DEFAULT_DISTANCE = 5.0f;
+    private static final float DEFAULT_DISTANCE = 30f;
     private float distance = DEFAULT_DISTANCE; // the magnitude distance to the looking position
 
     private static final float DEFAULT_HORIZONTAL_DISTANCE = 0, DEFAULT_VERTICAL_DISTANCE = 0; // default distance from looking position
     private float horizontalDistance = 0, verticalDistance = 0; // distance from the looking position
 
-    private static final float DEFAULT_VERTICAL_ANGLE = 63, DEFAULT_HORIZONTAL_ANGLE = 35; // default angles
+    private static final float DEFAULT_VERTICAL_ANGLE = 50, DEFAULT_HORIZONTAL_ANGLE = 30; // default angles
     private float verticalAngle = DEFAULT_VERTICAL_ANGLE, horizontalAngle = DEFAULT_HORIZONTAL_ANGLE; // used for looking straight forward
 
     private boolean rotatingVertical = false, rotatingHorizontal = false; // used for constraint rotation
@@ -132,6 +132,13 @@ public class Camera {
 //            translatingEastWest = false;
 //        }
 //
+
+        if (input.isKeyDown(GLFW.GLFW_KEY_ENTER)) {
+            this.verticalAngle = DEFAULT_VERTICAL_ANGLE;
+            this.horizontalAngle = DEFAULT_HORIZONTAL_ANGLE;
+            this.distance = DEFAULT_DISTANCE;
+        }
+
         // get the new x and y components of the mouse position
         newMouseX = input.getMouseX();
         newMouseY = input.getMouseY();
@@ -180,7 +187,7 @@ public class Camera {
 
         // change the camera distance using the scroll wheel
         if (distance > 0) {
-            distance -= dsy * 0.5f;
+            distance -= dsy * 1f;
         } else {
             distance = 0.1f;
         }

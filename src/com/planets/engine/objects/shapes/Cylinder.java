@@ -4,6 +4,7 @@ import com.planets.engine.graphics.Mesh;
 import com.planets.engine.graphics.Vertex;
 import com.planets.engine.math.Triangle;
 import com.planets.engine.math.Vector3f;
+import com.planets.engine.math.Vector4f;
 import com.planets.engine.objects.RenderObject;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class Cylinder extends RenderObject {
      * @return - a default cylinder
      */
     public static Cylinder makeCylinder() {
-        return makeCylinder(new Vector3f(0), new Vector3f(1), new Vector3f(0), 0.1f);
+        return makeCylinder(new Vector3f(0), new Vector3f(1), new Vector4f(0), 0.1f);
     }
 
     /**
@@ -51,7 +52,7 @@ public class Cylinder extends RenderObject {
      * @param radius - the radius of this cylinder
      * @return - the new cylinder
      */
-    public static Cylinder makeCylinder(Vector3f p1, Vector3f p2, Vector3f color, float radius) {
+    public static Cylinder makeCylinder(Vector3f p1, Vector3f p2, Vector4f color, float radius) {
         Vector3f position = Vector3f.midpoint(p1, p2);
         ArrayList<Triangle> triangles = generateTriangles(p1, p2, radius, SMOOTHNESS);
 
@@ -71,7 +72,7 @@ public class Cylinder extends RenderObject {
      * @param color     - the color of this mesh
      * @return - the new mesh
      */
-    private static Mesh generateMesh(ArrayList<Triangle> triangles, Vector3f color) {
+    private static Mesh generateMesh(ArrayList<Triangle> triangles, Vector4f color) {
         // create the vertex array
         Vertex[] vertices = new Vertex[triangles.size() * 3];
         for (int i = 0; i < triangles.size(); i++) {
@@ -99,7 +100,7 @@ public class Cylinder extends RenderObject {
      * @param p2 - the position of the second sphere
      * @return - the new mesh
      */
-    private static Mesh generateMesh(ArrayList<Triangle> triangles, Vector3f color, ArrayList<Triangle> sphere1, ArrayList<Triangle> sphere2, Vector3f p1, Vector3f p2) {
+    private static Mesh generateMesh(ArrayList<Triangle> triangles, Vector4f color, ArrayList<Triangle> sphere1, ArrayList<Triangle> sphere2, Vector3f p1, Vector3f p2) {
 
         ArrayList<Vertex> vertices = new ArrayList<>();
         // the triangles on the cylindrical face

@@ -3,6 +3,7 @@ package com.planets.engine.objects.shapes;
 import com.planets.engine.graphics.Mesh;
 import com.planets.engine.graphics.Vertex;
 import com.planets.engine.math.Vector3f;
+import com.planets.engine.math.Vector4f;
 import com.planets.engine.objects.RenderObject;
 
 public class Cube extends RenderObject {
@@ -14,7 +15,7 @@ public class Cube extends RenderObject {
      * @param scale - the scale of this cube
      * @param color - the color of this cube
      */
-    public Cube(Vector3f position, Vector3f rotation, Vector3f scale, Vector3f color) {
+    public Cube(Vector3f position, Vector3f rotation, Vector3f scale, Vector4f color) {
         super(new Mesh(new Vertex[] {
                 // front face
                 new Vertex(new Vector3f(-0.5f, -0.5f,  0.5f), color, new Vector3f(0, 0, 1)), // 0, 1
@@ -85,7 +86,7 @@ public class Cube extends RenderObject {
      * @param position - the position of this cube
      * @param color - the color of this cube
      */
-    public Cube(Vector3f position, Vector3f color) {
+    public Cube(Vector3f position, Vector4f color) {
         super(new Mesh(new Vertex[] {
                 // front face
                 new Vertex(new Vector3f(-0.5f, -0.5f,  0.5f), color, new Vector3f(0, 0, 1)), // 0, 1

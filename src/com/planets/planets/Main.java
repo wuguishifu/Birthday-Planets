@@ -8,7 +8,9 @@ import com.planets.engine.io.window.Input;
 import com.planets.engine.io.window.Window;
 import com.planets.engine.math.Vector3f;
 import com.planets.engine.objects.shapes.Sphere;
+import com.planets.planets.planet_object.Atmosphere;
 import com.planets.planets.planet_object.Planet;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL46;
 
 public class Main implements Runnable {
@@ -31,6 +33,7 @@ public class Main implements Runnable {
 
     // objects to be rendered
     private Planet planet; // test sphere
+    private Atmosphere atmosphere1; // test atmosphere
 
     /**
      * main method
@@ -82,12 +85,8 @@ public class Main implements Runnable {
         // create render objects here
         planet = Planet.getInstance(new Vector3f(0));
         planet.createMesh();
-        boolean print = false;
-        if (print) {
-            for (Vertex v : planet.getMesh().getVertices()) {
-                System.out.println(v);
-            }
-        }
+        atmosphere1 = Atmosphere.getInstance(new Vector3f(0));
+        atmosphere1.createMesh();
 
         // initialize the shader
         shader.create();
@@ -105,6 +104,10 @@ public class Main implements Runnable {
         GL46.glClearColor(bgcR, bgcG, bgcB, 1.0f);
         GL46.glClear(GL46.GL_COLOR_BUFFER_BIT | GL46.GL_DEPTH_BUFFER_BIT);
 
+        // update the planet
+        planet.rotate(0.1f, 0f, 0);
+        atmosphere1.rotate(0, 0.1f, 0);
+
         // update the camera
         camera.updateArcball();
     }
@@ -114,7 +117,15 @@ public class Main implements Runnable {
      */
     private void render() {
         // render the render objects
-        renderer.renderMesh(planet, camera, LIGHT_POSITION, false);
+        GL11.glCullFace(GL11.GL_BACK);
+        renderer.renderMesh(planet, camera, LIGHT_POSITION);
+
+//        // render the back face first
+//        GL11.glCullFace(GL11.GL_FRONT);
+//        renderer.renderMesh(atmosphere1, camera, LIGHT_POSITION);
+//        // then render the front face
+//        GL11.glCullFace(GL11.GL_BACK);
+//        renderer.renderMesh(atmosphere1, camera, LIGHT_POSITION);
 
         // swap buffers at the end
         window.swapBuffers();

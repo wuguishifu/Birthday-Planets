@@ -141,6 +141,7 @@ public class Window {
 
         // only renders objects that are facing the camera
         GL11.glEnable(GL_CULL_FACE);
+        GL11.glCullFace(GL_BACK);
 
         // render a vertex if and only if it appears in front of another vertex
         GL11.glEnable(GL_DEPTH_TEST);

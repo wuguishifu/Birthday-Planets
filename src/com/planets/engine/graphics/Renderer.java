@@ -33,7 +33,7 @@ public class Renderer {
      * @param object - the object to be rendered
      * @param camera - the camera perspective
      */
-    public void renderMesh(RenderObject object, Camera camera, Vector3f lightPosition, boolean transparent) {
+    public void renderMesh(RenderObject object, Camera camera, Vector3f lightPosition) {
         GL30.glBindVertexArray(object.getMesh().getVAO());
         GL30.glEnableVertexAttribArray(0);
         GL30.glEnableVertexAttribArray(1);
@@ -44,9 +44,8 @@ public class Renderer {
         shader.setUniform("view", Matrix4f.view(camera.getPosition(), camera.getRotation()));
         shader.setUniform("projection", window.getProjectionMatrix());
         shader.setUniform("lightPos", lightPosition);
-        shader.setUniform("lightLevel", 0.6f);
+        shader.setUniform("lightLevel", 0.1f);
         shader.setUniform("viewPos", camera.getPosition());
-        shader.setUniform("alpha", transparent ? 0.5f : 1.0f);
         shader.setUniform("lightColor", lightColor);
         GL11.glDrawElements(GL11.GL_TRIANGLES, object.getMesh().getIndices().length, GL11.GL_UNSIGNED_INT, 0);
         shader.unbind();

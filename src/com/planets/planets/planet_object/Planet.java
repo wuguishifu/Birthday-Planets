@@ -4,8 +4,10 @@ import com.planets.engine.graphics.Mesh;
 import com.planets.engine.graphics.Vertex;
 import com.planets.engine.math.Triangle;
 import com.planets.engine.math.Vector3f;
+import com.planets.engine.math.Vector4f;
 import com.planets.engine.math.color.ColorFader;
 import com.planets.engine.math.noise.ImprovedNoise;
+import com.planets.engine.math.noise.SimplexNoise;
 import com.planets.engine.objects.RenderObject;
 
 import java.awt.*;
@@ -17,7 +19,6 @@ public class Planet extends RenderObject {
     // generation variables
     private static int depth; // the amount of times to recursively subdivide faces
     private static final float phi = 1.618f; // the golden ratio used for approximating a tetrahedron
-    private static final float DEFAULT_RADIUS = 1.0f;
 
     /**
      * default constructor
@@ -47,39 +48,56 @@ public class Planet extends RenderObject {
         return new Planet(generateMesh(), new Vector3f(xyz), new Vector3f(0), new Vector3f(1));
     }
 
+    /**
+     * rotates the planet by some amount
+     * @param dx - the change in x rotation
+     * @param dy - the change in y position
+     * @param dz - the change in z position
+     */
+    public void rotate(float dx, float dy, float dz) {
+        this.setRotation(this.getRotation().add(dx, dy, dz));
+    }
+
     private static Mesh generateMesh() {
 
-        Random random = new Random(8302000);
-        Color c11 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-        Color c22 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-        Color c33 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+        Random random = new Random(10022001);
+//        Color c11 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+//        Color c22 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+//        Color c33 = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
 
-//        String[] colors = {"#E97C7C", "#E9B37C", "#6D0269"}; // the colors
+//        depth = 3; // how much to recursively subdivide faces
+//        float spareDistance = 5f * random.nextFloat(); // increase -> more spikes
+//        float spareOffset = 2.0f * random.nextFloat(); // change -> different generation
+//        float amplitude = 5f * random.nextFloat(); // increase -> larger peaks
+//        float radius = 2.0f * random.nextFloat(); // the default radius of the planet (water level)
+        // want radius eventually to be  abs(2000 - birthyear) % 10
 
-        depth = 3; // how much to recursively subdivide faces
-        float spareDistance = 5f * random.nextFloat(); // increase -> more spikes
-        float spareOffset = 2.0f * random.nextFloat(); // change -> different generation
-        float amplitude = 5f * random.nextFloat(); // increase -> larger peaks
-        float radius = 1.0f; // the default radius of the planet (water level)
+        Color c11 = Color.decode("#1a285a");
+        Color c22 = Color.decode("#3b5842");
+        Color c33 = Color.decode("#a99041");
+
+        depth = 4;
+        float spareDistance = 0.5f;
+        float spareOffset = 2f;
+        float amplitude = 5.0f;
+        float radius = 10.0f;
+        float oceanBias = 0.2f;
 
         // generate the triangles
         ArrayList<Triangle> triangles = generateTriangles(radius);
 
-//        ColorFader cf = new ColorFader( // color chooser
-//                Color.decode(colors[0]), // lowest altitude color
-//                Color.decode(colors[1]), // medium altitude color
-//                Color.decode(colors[2])  // high altitude color
-//        );
-
         ColorFader cf = new ColorFader(c11, c22, c33);
+
+        int seed = 10;
+        SimplexNoise simplexNoise = new SimplexNoise(5, 0.7f, seed);
 
         float maxHeight = 0.0f;
         for (Vector3f v : previousVertices) {
             v.normalize((float) (
-                    radius + amplitude * Math.max(ImprovedNoise.noise(
-                            v.getX() * spareDistance + spareOffset,
-                            v.getY() * spareDistance + spareOffset,
-                            v.getZ() * spareDistance + spareOffset
+                    radius + amplitude * Math.max(simplexNoise.getNoise3D(
+                            v.getX() * spareDistance,
+                            v.getY() * spareDistance,
+                            v.getZ() * spareDistance
                     ), 0)));
 
             if (Vector3f.length(v) > maxHeight) {
@@ -112,9 +130,13 @@ public class Planet extends RenderObject {
 //            Vector3f c2 = new Vector3f(0.5f * ps2, 0.5f - 0.5f * Math.abs(0.5f - ps2), 0.5f - 1f * ps2);
 //            Vector3f c3 = new Vector3f(0.5f * ps3, 0.5f - 0.5f * Math.abs(0.5f - ps3), 0.5f - 1f * ps3);
 
-            Vector3f c1 = cf.getColor(ps1);
-            Vector3f c2 = cf.getColor(ps2);
-            Vector3f c3 = cf.getColor(ps3);
+            Vector3f _c1 = cf.getColor(ps1);
+            Vector3f _c2 = cf.getColor(ps2);
+            Vector3f _c3 = cf.getColor(ps3);
+
+            Vector4f c1 = new Vector4f(_c1, 1.0f);
+            Vector4f c2 = new Vector4f(_c2, 1.0f);
+            Vector4f c3 = new Vector4f(_c3, 1.0f);
 
             // compute normal vectors
             Vector3f n1 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV2(), t.getV1()), Vector3f.subtract(t.getV3(), t.getV1())));

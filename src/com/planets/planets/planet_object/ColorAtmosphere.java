@@ -1,62 +1,80 @@
-package com.planets.engine.objects.shapes;
+package com.planets.planets.planet_object;
 
 import com.planets.engine.graphics.Mesh;
 import com.planets.engine.graphics.Vertex;
 import com.planets.engine.math.Triangle;
 import com.planets.engine.math.Vector3f;
 import com.planets.engine.math.Vector4f;
+import com.planets.engine.math.noise.ImprovedNoise;
 import com.planets.engine.objects.RenderObject;
 
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 
-public class Sphere extends RenderObject {
+public class ColorAtmosphere extends RenderObject {
 
-    // the amount of times to recursively subdivide faces
-    private static final int depth = 4;
-
-    // the golden ratio
-    private static final float phi = 1.16180339f;
+    // generation variables
+    private static int depth; // the amount of times to recursively subdivide faces
+    private static final float phi = 1.618f; // the golden ratio used for approximating a tetrahedron
 
     /**
-     * default constructor for specified values
-     *
-     * @param mesh     - the mesh that this object is made of
-     * @param position - the position of this object
-     * @param rotation - the rotation of this object
-     * @param scale    - the scale of this object
+     * default constructor
+     * @param mesh - the mesh that this object is made of
+     * @param position - the position of the atmosphere
+     * @param rotation - te rotation of the atmosphere
+     * @param scale - the scale of the atmosphere
      */
-    public Sphere(Mesh mesh, Vector3f position, Vector3f rotation, Vector3f scale) {
+    public ColorAtmosphere(Mesh mesh, Vector3f position, Vector3f rotation, Vector3f scale) {
         super(mesh, position, rotation, scale);
     }
 
-    /**
-     * create a sphere
-     * @return - a new sphere
-     */
-    public static Sphere makeSphere(Vector3f position, Vector4f color, float radius) {
-        return new Sphere(generateMesh(color, radius), position, new Vector3f(0), new Vector3f(1));
+    public static ColorAtmosphere getInstance(Vector3f position) {
+        return new ColorAtmosphere(generateMesh(), position, new Vector3f(0), new Vector3f(1));
     }
 
-    /**
-     * generates a mesh
-     * @param color - the color of the sphere
-     * @param radius - the radius of the sphere
-     * @return - the mesh of the sphere
-     */
-    public static Mesh generateMesh(Vector4f color, float radius) {
+    private static Mesh generateMesh() {
 
-        // generate the triangles
+        depth = 3;
+
+        Random random = new Random(140);
+
+        float radius = 14.0f;
+        int _r = random.nextInt(255);
+        int _g = random.nextInt(255);
+        int _b = random.nextInt(255);
+
+        float spareDistance = 0.3f;
+
         ArrayList<Triangle> triangles = generateTriangles(radius);
 
-        // create the vertex array
+        // create the vertex araray
         Vertex[] vertices = new Vertex[triangles.size() * 3];
         for (int i = 0; i < triangles.size(); i++) {
             Triangle t = triangles.get(i);
-            vertices[3 * i] = new Vertex(t.getV1(), color, Vector3f.subtract(t.getV1(), new Vector3f(0)));
-            vertices[3 * i + 1] = new Vertex(t.getV2(), color, Vector3f.subtract(t.getV2(), new Vector3f(0)));
-            vertices[3 * i + 2] = new Vertex(t.getV3(), color, Vector3f.subtract(t.getV3(), new Vector3f(0)));
+
+            float r = (float) Math.max(0, Math.min(255, _r + 200 * ImprovedNoise.noise(
+                    spareDistance * t.getV1().getX(),
+                    spareDistance * t.getV1().getY(),
+                    spareDistance * t.getV1().getZ())));
+            float g = (float) Math.max(0, Math.min(255, _g + 200 * ImprovedNoise.noise(
+                    spareDistance * t.getV2().getX(),
+                    spareDistance * t.getV2().getY(),
+                    spareDistance * t.getV2().getZ())));
+            float b = (float) Math.max(0, Math.min(255, _b + 200 * ImprovedNoise.noise(
+                    spareDistance * t.getV3().getX(),
+                    spareDistance * t.getV3().getY(),
+                    spareDistance * t.getV3().getZ())));
+            Vector4f c = new Vector4f(r/255.f, g/255.f, b/255.f, 1.0f);
+
+            Vector3f n1 = Vector3f.normalize(Vector3f.cross(Vector3f.subtract(t.getV2(), t.getV1()), Vector3f.subtract(t.getV3(), t.getV1())));
+
+            vertices[3 * i]     = new Vertex(t.getV1(), c, n1);
+            vertices[3 * i + 1] = new Vertex(t.getV2(), c, n1);
+            vertices[3 * i + 2] = new Vertex(t.getV3(), c, n1);
         }
 
+        // generate draw order indices
         int[] indices = new int[triangles.size() * 3];
         for (int i = 0; i < triangles.size() * 3; i++) {
             indices[i] = i;
@@ -64,29 +82,7 @@ public class Sphere extends RenderObject {
 
         // make a new mesh
         return new Mesh(vertices, indices);
-    }
 
-    /**
-     * generates a list of vertices;
-     * @param position - the position of the sphere
-     * @param color - the color of the sphere
-     * @param radius - the radius of the sphere
-     * @return - a vertex array
-     */
-    public static Vertex[] generateVertices(Vector3f position, Vector4f color, float radius) {
-        // generate the triangles
-        ArrayList<Triangle> triangles = generateTriangles(radius);
-
-        // create the vertex array
-        Vertex[] vertices = new Vertex[triangles.size() * 3];
-        for (int i = 0; i < triangles.size(); i++) {
-            Triangle t = triangles.get(i);
-            vertices[3 * i] = new Vertex(t.getV1(), color, Vector3f.subtract(t.getV1(), position));
-            vertices[3 * i + 1] = new Vertex(t.getV2(), color, Vector3f.subtract(t.getV2(), position));
-            vertices[3 * i + 2] = new Vertex(t.getV3(), color, Vector3f.subtract(t.getV3(), position));
-        }
-
-        return vertices;
     }
 
     /**
@@ -94,6 +90,7 @@ public class Sphere extends RenderObject {
      * @param radius - the radius of the sphere
      */
     public static ArrayList<Triangle> generateTriangles(float radius) {
+        previousVertices = new ArrayList<>();
 
         ArrayList<Triangle> faces = new ArrayList<>();
 
@@ -137,6 +134,8 @@ public class Sphere extends RenderObject {
         return faces;
     }
 
+    private static ArrayList<Vector3f> previousVertices;
+
     /**
      * recursively subdivides a triangle into 4 triangles, and then normalizes each new vertex to a radius of 1
      * @param v1 - the first vertex of the triangle
@@ -151,10 +150,27 @@ public class Sphere extends RenderObject {
         // default condition
         if (depth == 0) {
 
-            // create new vectors to modify
             Vector3f v1p = Vector3f.normalize(v1, radius);
             Vector3f v2p = Vector3f.normalize(v2, radius);
             Vector3f v3p = Vector3f.normalize(v3, radius);
+
+            if (previousVertices.contains(v1p)) {
+                v1p = previousVertices.get(previousVertices.indexOf(v1p));
+            } else {
+                previousVertices.add(v1p);
+            }
+
+            if (previousVertices.contains(v2p)) {
+                v2p = previousVertices.get(previousVertices.indexOf(v2p));
+            } else {
+                previousVertices.add(v2p);
+            }
+
+            if (previousVertices.contains(v3p)) {
+                v3p = previousVertices.get(previousVertices.indexOf(v3p));
+            } else {
+                previousVertices.add(v3p);
+            }
 
             faces.add(new Triangle(v1p, v2p, v3p));
             return faces;
@@ -167,19 +183,12 @@ public class Sphere extends RenderObject {
         Vector3f v31 = Vector3f.normalize(new Vector3f(v3.getX() + v1.getX(), v3.getY() + v1.getY(), v3.getZ() + v1.getZ()), radius);
 
         // recursive part
-        faces.addAll(subdivide(v1, v12, v31, depth-1, radius));
-        faces.addAll(subdivide(v2, v23, v12, depth-1, radius));
-        faces.addAll(subdivide(v3, v31, v23, depth-1, radius));
-        faces.addAll(subdivide(v12, v23, v31,depth-1, radius));
+        faces.addAll(subdivide(v1, v12, v31, depth - 1, radius));
+        faces.addAll(subdivide(v2, v23, v12, depth - 1, radius));
+        faces.addAll(subdivide(v3, v31, v23, depth - 1, radius));
+        faces.addAll(subdivide(v12, v23, v31,depth - 1, radius));
 
         return faces;
     }
 
-    /**
-     * moves a sphere to a new position
-     * @param position - the new position
-     */
-    public void moveTo(Vector3f position) {
-        this.setPosition(position);
-    }
 }
